@@ -6,7 +6,9 @@ Setting up the workspace,
 1) Initialize a catkin workspace in your home folder,
 
 mkdir -p ~/fetch_ws/src
+
 cd ~/fetch_ws/src
+
 catkin_init_wokspace
 
 2) Download all the packages from https://github.com/fetchrobotics and place them in the src folder
