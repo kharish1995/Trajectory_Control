@@ -25,7 +25,7 @@
     <arg name="fake_execution" value="false"/>
     <arg name="info" value="true"/>
     <arg name="debug" value="$(arg debug)"/>
-    <!--arg name="pipeline" value="$(arg pipeline)" /-->
+    <arg name="pipeline" value="$(arg pipeline)" />
   </include>
 
   <!-- Oh, you wanted a robot? -->

@@ -1,0 +1,10 @@
+<launch>   
+	<!-- Launch Rviz, MoveIt! and robot_state_publisher -->   
+	<include file="$(find fetch_moveit_config)/launch/demo.launch"/>      
+
+	<!-- Launch node to raise arm -->   
+	<node name="test_moveit" pkg="fetch_moveit_tasks" type="test_moveit" respawn="false" output="screen">   
+	</node>      
+</launch>
+
+
