@@ -18,16 +18,6 @@
     <arg name="headless" value="$(arg headless)"/>
   </include>
 
-  <!-- Run the main MoveIt executable without trajectory execution (we do not have controllers configured by default) -->
-  <arg name="pipeline" default="$(optenv PLANNING_PIPELINE ompl)" />
-  <include file="$(find fetch_moveit_config)/launch/move_group.launch">
-    <arg name="allow_trajectory_execution" value="true"/>  
-    <arg name="fake_execution" value="false"/>
-    <arg name="info" value="true"/>
-    <arg name="debug" value="$(arg debug)"/>
-    <!--arg name="pipeline" value="$(arg pipeline)" /-->
-  </include>
-
   <!-- Oh, you wanted a robot? -->
   <include file="$(find fetch_common)/launch/include/$(arg robot).launch.xml" />
 
