@@ -3,12 +3,14 @@
 TrajectoryFollow::TrajectoryFollow()
 {
     arm_client = new armClient("arm_controller/follow_joint_trajectory", true);
+    base_client = new baseClient("move_base", true);
     outputs = MatrixXf::Random(6,6);
 }
 
 TrajectoryFollow::~TrajectoryFollow()
 {
      delete arm_client;
+     delete base_client;
 }
 
 void TrajectoryFollow::startTrajectory(control_msgs::FollowJointTrajectoryGoal& arm_goal)
@@ -17,9 +19,16 @@ void TrajectoryFollow::startTrajectory(control_msgs::FollowJointTrajectoryGoal& 
     arm_client->sendGoal(arm_goal);
 }
 
+void TrajectoryFollow::startMoveBase(move_base_msgs::MoveBaseGoal& base_goal)
+{
+    base_goal.target_pose.header.stamp = ros::Time::now() + ros::Duration(1.0);
+    ROS_INFO_STREAM(base_goal.target_pose.pose.position.x << std::endl);
+    base_client->sendGoal(base_goal);
+}
+
 actionlib::SimpleClientGoalState TrajectoryFollow::getState()
 {
-    return arm_client->getState();
+    return base_client->getState();
 }
 
 void TrajectoryFollow::jointsCallback(const sensor_msgs::JointState& state)
@@ -108,10 +117,22 @@ control_msgs::FollowJointTrajectoryGoal TrajectoryFollow::armExtensionTrajectory
 
     arm_goal.trajectory.points[i].time_from_start = ros::Duration(1 + 2*t);
 
-    t = t + 0.05;
+    t = t + float(t_max)/no_of_iterations;
 
     ROS_INFO_STREAM("arm_goal" << arm_goal << std::endl);
     //ROS_INFO_STREAM("t:" << t << std::endl);
     }
     return arm_goal;
+}
+
+move_base_msgs::MoveBaseGoal TrajectoryFollow::baseMove()
+{
+    move_base_msgs::MoveBaseGoal base_goal;
+
+    base_goal.target_pose.pose.position.x = 10.0;
+    base_goal.target_pose.pose.orientation.w = 1.0;
+    base_goal.target_pose.header.frame_id = 'first';
+    base_goal.target_pose.header.stamp = ros::Time::now();
+
+    return base_goal;
 }
