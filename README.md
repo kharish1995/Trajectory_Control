@@ -29,4 +29,3 @@ catkin_make
 Team Members:
 Harish Karunakaran
 Gopeshh Raaj
-Chris Dwight
