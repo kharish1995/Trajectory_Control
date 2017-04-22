@@ -7,11 +7,7 @@ int main(int argc, char **argv)
     ros::NodeHandle nh;
     TrajectoryFollow dynam(nh);
 
-    //ros::Subscriber sub = nh.subscribe("joint_states", 1000, &TrajectoryFollow::jointsCallback, &dynam);
-
-    //ROS_INFO_STREAM("jointstates" << joint_states[0] << std::endl);
     srand(1);
-
     KDL::JntArray result;
 
     int num_samples;
@@ -26,6 +22,7 @@ int main(int argc, char **argv)
         ROS_FATAL("Missing chain info in launch file");
         exit (-1);
     }
+    ros::spinOnce();
 
     nh.param("timeout", timeout, 0.005);
     nh.param("urdf_param", urdf_param, std::string("/robot_description"));
@@ -33,34 +30,38 @@ int main(int argc, char **argv)
     if (num_samples < 1)
         num_samples = 1;
 
-    dynam.solve_ik(num_samples, chain_start, chain_end, timeout, urdf_param, result);
-
+    //dynam.solve_ik(num_samples, chain_start, chain_end, timeout, urdf_param, result);
 
 
     MatrixXd joint_positions(2,6);
-    joint_positions << 1.3200041507484386, 1.3999855756514323, -0.19988558358145525, 1.719970634612789, 5.510375048700666e-06, 1.6600036782876648,
-                       0, 0.1485, 0, 0, 0, 0;
+
+    std::vector<float> joint_values = dynam.getJoint_states();
+
+    joint_positions << joint_values.at(0), joint_values.at(1), joint_values.at(2), joint_values.at(3), joint_values.at(4), joint_values.at(5),
+                       0, 0, 0, 0, 0, 0;
     
-    ROS_INFO_STREAM(joint_positions << std::endl);
     MatrixXd outputs(6,6);
     outputs = dynam.trajectory(joint_positions, t_max);
 
+//    move_base_msgs::MoveBaseGoal base_goal = dynam.baseMove();
+//    ros::Duration(30).sleep();
+//    dynam.startMoveBase(base_goal);
+//    ROS_INFO_STREAM("base: " << base_goal.target_pose.pose.position.x << std::endl);
+
     control_msgs::FollowJointTrajectoryGoal traj;
     traj = dynam.armExtensionTrajectory(outputs);
-
     dynam.startTrajectory(traj);
-    ROS_INFO_STREAM("IK" << result.data << std::endl);
+
+    control_msgs::GripperCommandGoal grip_goal;
+    grip_goal = dynam.gripperTrajectory();
+    dynam.startGripperAction(grip_goal);
 
 
-//    move_base_msgs::MoveBaseGoal base_goal = dynam.baseMove();
-
-  //  dynam.startMoveBase(base_goal);
-
-    while(!dynam.getState().isDone() && ros::ok())
+    while(!dynam.getArmState().isDone() && ros::ok() && !dynam.getGripperState().isDone())
     {
         usleep(50000);
     }
 
-    ros::spinOnce();
+
     return 0;
 }

@@ -1,46 +1,79 @@
 #include "fetch_traj/fetch_traj.h"
 
+bool TrajectoryFollow::isJointStatePopulated = false;
+
+
+
+std::vector<float> TrajectoryFollow::getJoint_states() const
+{
+    return joint_states;
+}
+
 TrajectoryFollow::TrajectoryFollow(ros::NodeHandle& nh)
 {
+    ROS_INFO("Object of TrajectoryFollow created");
+    jointStateSub_ = nh.subscribe("joint_states",10, &TrajectoryFollow::jointsCallback, this);
     arm_client = new armClient("arm_controller/follow_joint_trajectory", true);
     base_client = new baseClient("move_base", true);
+    gripper_client = new gripperClient("gripper_controller/gripper_action", true);
     outputs = MatrixXd::Random(6,6);
     nh_ = nh;
+    joint_states.resize(6);
+    ros::Duration(2).sleep();
 }
 
 TrajectoryFollow::~TrajectoryFollow()
 {
      delete arm_client;
      delete base_client;
+     delete gripper_client;
 }
 
 void TrajectoryFollow::startTrajectory(control_msgs::FollowJointTrajectoryGoal& arm_goal)
 {
     arm_goal.trajectory.header.stamp = ros::Time::now() + ros::Duration(1.0);
     arm_client->sendGoal(arm_goal);
+    arm_client->waitForResult(ros::Duration(10.0));
 }
 
 void TrajectoryFollow::startMoveBase(move_base_msgs::MoveBaseGoal& base_goal)
 {
     base_goal.target_pose.header.stamp = ros::Time::now() + ros::Duration(1.0);
-    ROS_INFO_STREAM(base_goal.target_pose.pose.position.x << std::endl);
     base_client->sendGoal(base_goal);
 }
 
-actionlib::SimpleClientGoalState TrajectoryFollow::getState()
+void TrajectoryFollow::startGripperAction(control_msgs::GripperCommandGoal& gripper_goal)
+{
+    gripper_client->sendGoal(gripper_goal);
+    gripper_client->waitForResult(ros::Duration(5.0));
+}
+
+actionlib::SimpleClientGoalState TrajectoryFollow::getArmState()
 {
     return arm_client->getState();
 }
 
+actionlib::SimpleClientGoalState TrajectoryFollow::getBaseState()
+{
+    return base_client->getState();
+}
+
+actionlib::SimpleClientGoalState TrajectoryFollow::getGripperState()
+{
+    return gripper_client->getState();
+}
+
 void TrajectoryFollow::jointsCallback(const sensor_msgs::JointState& state)
 {
-    ROS_INFO_STREAM("t:" << std::endl);
-    joint_states.clear();
-    ROS_INFO_STREAM("t1:" << std::endl);
-    for(unsigned int i = 6; i < 12; i++)
-    {
-        joint_states.push_back(state.position[i]);
-    }
+//    if (!isJointStatePopulated) {
+
+        for(unsigned int i = 6; i < 12; i++)
+        {
+            joint_states[i-6] = state.position[i];
+           //ROS_INFO("State position id : %d = Value : %.2f", i, joint_states[i-6]);
+        }
+        isJointStatePopulated = true;
+//    }
 }
 
 MatrixXd TrajectoryFollow::trajectory(const MatrixXd& joint_positions, float tf)
@@ -70,10 +103,18 @@ MatrixXd TrajectoryFollow::trajectory(const MatrixXd& joint_positions, float tf)
     return outputs;
 }
 
+control_msgs::GripperCommandGoal TrajectoryFollow::gripperTrajectory()
+{
+    control_msgs::GripperCommandGoal gripper_goal;
+    gripper_goal.command.max_effort = 10;
+    gripper_goal.command.position = 0;
+
+    return gripper_goal;
+}
+
 control_msgs::FollowJointTrajectoryGoal TrajectoryFollow::armExtensionTrajectory(const MatrixXd& input)
 {
     control_msgs::FollowJointTrajectoryGoal arm_goal;
-    ROS_INFO("1");
     arm_goal.trajectory.joint_names.push_back("shoulder_pan_joint");
     arm_goal.trajectory.joint_names.push_back("shoulder_lift_joint");
     arm_goal.trajectory.joint_names.push_back("upperarm_roll_joint");
@@ -85,7 +126,7 @@ control_msgs::FollowJointTrajectoryGoal TrajectoryFollow::armExtensionTrajectory
     arm_goal.trajectory.points.resize(no_of_iterations);
     float t = 0;
 
-    for(unsigned int i = 0; i < no_of_iterations; i++)
+    for(size_t i = 0; i < no_of_iterations; i++)
     {
     arm_goal.trajectory.points[i].positions.resize(7);
     arm_goal.trajectory.points[i].positions[0] = input(0,0) + input(1,0)*t + input(2,0)*pow(t,2) + input(3,0)*pow(t,3) + input(4,0)*pow(t,4) + input(5,0)*pow(t,5);
@@ -119,9 +160,6 @@ control_msgs::FollowJointTrajectoryGoal TrajectoryFollow::armExtensionTrajectory
     arm_goal.trajectory.points[i].time_from_start = ros::Duration(1 + 2*t);
 
     t = t + float(t_max)/no_of_iterations;
-
-    ROS_INFO_STREAM("arm_goal" << arm_goal << std::endl);
-    //ROS_INFO_STREAM("t:" << t << std::endl);
     }
     return arm_goal;
 }
@@ -133,8 +171,7 @@ move_base_msgs::MoveBaseGoal TrajectoryFollow::baseMove()
     base_goal.target_pose.pose.position.x = 10.0;
     base_goal.target_pose.pose.orientation.w = 1.0;
     //base_goal.target_pose.header.frame_id = 'first';
-    //base_goal.target_pose.header.stamp = ros::Time::now();
-
+    base_goal.target_pose.header.stamp = ros::Time::now();
     return base_goal;
 }
 
@@ -208,9 +245,9 @@ bool TrajectoryFollow::solve_ik(double num_samples, std::string chain_start, std
     int rc;
 
     end_effector_pose.M = KDL::Rotation::Quaternion(0, 0, 0, 1.0);
-    //end_effector_pose.M = KDL::Rotation::Quaternion(0.0170139, 2.141912e-05, 0.0158422, 0.99972975);
-    end_effector_pose.p = KDL::Vector(0.33, 0.45, 0.97);
-    //end_effector_pose.p = KDL::Vector(2.517288, -0.552732, 1.165227);
+
+    end_effector_pose.p = KDL::Vector(0.1, 0.1, 0.1);
+
 
 
     ROS_INFO_STREAM("*** Testing TRAC-IK with "<<num_samples<<" random samples");
@@ -223,3 +260,4 @@ bool TrajectoryFollow::solve_ik(double num_samples, std::string chain_start, std
     ROS_INFO_STREAM("Result data - " << result.data);
     return 1;
 }
+
