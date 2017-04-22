@@ -1,26 +1,36 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(fetch_tracik)
+project(fetch_traj)
 
 ## Add support for C++11, supported in ROS Kinetic and newer
-# add_definitions(-std=c++11)
+#add_definitions(-std=c++11)
 
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
   roscpp
+  rospy
+  std_msgs
+  sensor_msgs
   tf
+  actionlib
+  actionlib_msgs
+  control_msgs
+  trajectory_msgs
+  geometry_msgs
+  cmake_modules
   trac_ik_lib
 )
 
 ## System dependencies are found with CMake's conventions
-# find_package(Boost REQUIRED COMPONENTS system)
+find_package(Eigen REQUIRED)
 find_package(orocos_kdl REQUIRED)
+#find_package(Boost REQUIRED COMPONENTS system)
+
 
 ## Uncomment this if the package has a setup.py. This macro ensures
 ## modules and global scripts declared therein get installed
 ## See http://ros.org/doc/api/catkin/html/user_guide/setup_dot_py.html
-
 # catkin_python_setup()
 
 ################################################
@@ -71,7 +81,7 @@ find_package(orocos_kdl REQUIRED)
 ## Generate added messages and services with any dependencies listed here
 # generate_messages(
 #   DEPENDENCIES
-#   std_msgs  # Or other packages containing msgs
+#   std_msgs
 # )
 
 ################################################
@@ -106,20 +116,9 @@ find_package(orocos_kdl REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES fetch_traj
-  CATKIN_DEPENDS
-    trac_ik_lib
-    roscpp
-    tf
-  DEPENDS
-    Boost
-    orocos_kdl
-    system_lib
+  CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs actionlib trac_ik_lib
+  DEPENDS system_lib orocos_kdl
 )
-#  INCLUDE_DIRS include
-#  LIBRARIES fetch_tracik
-#  CATKIN_DEPENDS roscpp tf
-#  DEPENDS system_lib
-
 
 ###########
 ## Build ##
@@ -130,28 +129,30 @@ catkin_package(
 include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
+  ${Eigen_INCLUDE_DIRS}
   ${orocos_kdl_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
- add_library(${PROJECT_NAME}
-   src/fetch_tracik.cpp
- )
- 
+add_library(${PROJECT_NAME}
+   src/fetch_traj.cpp
+)
+
 target_link_libraries(${PROJECT_NAME}
    ${catkin_LIBRARIES}
    ${orocos_kdl_INCLUDE_DIRS}
 )
+
+
 ## Add cmake target dependencies of the library
 ## as an example, code may need to be generated before libraries
 ## either from message generation or dynamic reconfigure
- add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
- add_executable(${PROJECT_NAME}_node src/fetch_tracik_node.cpp)
+add_executable(${PROJECT_NAME}_node src/fetch_traj_node.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -161,12 +162,14 @@ target_link_libraries(${PROJECT_NAME}
 
 ## Add cmake target dependencies of the executable
 ## same as for the library above
- add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
- target_link_libraries(${PROJECT_NAME}_node
+target_link_libraries(${PROJECT_NAME}_node
+   ${PROJECT_NAME}
    ${catkin_LIBRARIES}
-   ${Boost_LIBRARIES}
+   ${Eigen_LIBRARIES}
+   ${GAZEBO_LIBRARIES}
    ${orocos_kdl_LIBRARIES}
  )
 
@@ -215,7 +218,7 @@ SET(CMAKE_BUILD_TYPE RelWithDebInfo)
 #############
 
 ## Add gtest based cpp test target and link libraries
-# catkin_add_gtest(${PROJECT_NAME}-test test/test_fetch_tracik.cpp)
+# catkin_add_gtest(${PROJECT_NAME}-test test/test_fetch_traj.cpp)
 # if(TARGET ${PROJECT_NAME}-test)
 #   target_link_libraries(${PROJECT_NAME}-test ${PROJECT_NAME})
 # endif()

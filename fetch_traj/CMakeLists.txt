@@ -19,10 +19,12 @@ find_package(catkin REQUIRED COMPONENTS
   trajectory_msgs
   geometry_msgs
   cmake_modules
+  trac_ik_lib
 )
 
 ## System dependencies are found with CMake's conventions
 find_package(Eigen REQUIRED)
+find_package(orocos_kdl REQUIRED)
 #find_package(Boost REQUIRED COMPONENTS system)
 
 
@@ -114,8 +116,8 @@ find_package(Eigen REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES fetch_traj
-  CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs actionlib
-  DEPENDS system_lib
+  CATKIN_DEPENDS roscpp rospy std_msgs sensor_msgs actionlib trac_ik_lib
+  DEPENDS system_lib orocos_kdl
 )
 
 ###########
@@ -128,6 +130,7 @@ include_directories(include)
 include_directories(
   ${catkin_INCLUDE_DIRS}
   ${Eigen_INCLUDE_DIRS}
+  ${orocos_kdl_INCLUDE_DIRS}
 )
 
 ## Declare a C++ library
@@ -166,6 +169,7 @@ target_link_libraries(${PROJECT_NAME}_node
    ${catkin_LIBRARIES}
    ${Eigen_LIBRARIES}
    ${GAZEBO_LIBRARIES}
+   ${orocos_kdl_LIBRARIES}
  )
 
 #############

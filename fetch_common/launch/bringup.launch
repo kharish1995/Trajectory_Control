@@ -25,15 +25,5 @@
   <!-- Oh, you wanted a robot? -->
   <include file="$(find fetch_common)/launch/include/$(arg robot).launch.xml" />
   
-  <!--param name="robot_description" textfile="$(find fetch_description)/robots/fetch.urdf"/-->
-
-
-  <node name="ik_solver" pkg="fetch_tracik" type="fetch_tracik_node" output="screen">
-    <param name="num_samples" value="$(arg num_samples)"/>
-    <param name="chain_start" value="$(arg chain_start)"/>
-    <param name="chain_end" value="$(arg chain_end)"/>
-    <param name="timeout" value="$(arg timeout)"/>
-    <param name="urdf_param" value="/robot_description"/>
-</node>
 
 </launch>

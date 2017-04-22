@@ -14,6 +14,8 @@
 #include <trajectory_msgs/JointTrajectoryPoint.h>
 #include <move_base_msgs/MoveBaseAction.h>
 #include <move_base_msgs/MoveBaseGoal.h>
+#include <trac_ik/trac_ik.hpp>
+#include <kdl/chainiksolverpos_nr_jl.hpp>
 #include "sensor_msgs/JointState.h"
 
 #define no_of_iterations 100
@@ -28,12 +30,13 @@ using namespace Eigen;
 
 class TrajectoryFollow{
 private:
+     ros::NodeHandle nh_;
      armClient *arm_client;
      baseClient *base_client;
-     MatrixXf outputs;
+     MatrixXd outputs;
 
 public:
-    TrajectoryFollow();
+    TrajectoryFollow(ros::NodeHandle& nh);
 
     ~TrajectoryFollow();
     
@@ -43,12 +46,16 @@ public:
 
     void jointsCallback(const sensor_msgs::JointState& state);
 
-    MatrixXf trajectory(const MatrixXf& joint_positions, float tf);
+    MatrixXd trajectory(const MatrixXd& joint_positions, float tf);
 
-    control_msgs::FollowJointTrajectoryGoal armExtensionTrajectory(const MatrixXf& input);
+    control_msgs::FollowJointTrajectoryGoal armExtensionTrajectory(const MatrixXd& input);
     
     move_base_msgs::MoveBaseGoal baseMove();
 
     void startMoveBase(move_base_msgs::MoveBaseGoal& base_goal);
+
+    bool solve_ik(double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string, KDL::JntArray &result);
+
+    double fRand(double min, double max);
 
 };
