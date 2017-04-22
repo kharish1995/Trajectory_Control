@@ -12,19 +12,24 @@
 #include <actionlib/client/simple_action_client.h>
 #include <trajectory_msgs/JointTrajectory.h>
 #include <trajectory_msgs/JointTrajectoryPoint.h>
+#include <move_base_msgs/MoveBaseAction.h>
+#include <move_base_msgs/MoveBaseGoal.h>
 #include "sensor_msgs/JointState.h"
 
 #define no_of_iterations 100
 #define t_max 5
 
 std::vector<float> joint_states;
-typedef actionlib::SimpleActionClient< control_msgs::FollowJointTrajectoryAction > armClient;
-using namespace Eigen;
 
+typedef actionlib::SimpleActionClient <control_msgs::FollowJointTrajectoryAction> armClient;
+typedef actionlib::SimpleActionClient <move_base_msgs::MoveBaseAction> baseClient;
+
+using namespace Eigen;
 
 class TrajectoryFollow{
 private:
      armClient *arm_client;
+     baseClient *base_client;
      MatrixXf outputs;
 
 public:
@@ -41,4 +46,9 @@ public:
     MatrixXf trajectory(const MatrixXf& joint_positions, float tf);
 
     control_msgs::FollowJointTrajectoryGoal armExtensionTrajectory(const MatrixXf& input);
+    
+    move_base_msgs::MoveBaseGoal baseMove();
+
+    void startMoveBase(move_base_msgs::MoveBaseGoal& base_goal);
+
 };
