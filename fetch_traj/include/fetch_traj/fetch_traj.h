@@ -70,7 +70,7 @@ public:
 
     void startGripperAction(control_msgs::GripperCommandGoal& gripper_goal);
 
-    bool solve_ik(double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string, KDL::JntArray &result);
+    bool solve_ik(double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string, KDL::JntArray &result, double x, double y, double z);
 
     double fRand(double min, double max);
 

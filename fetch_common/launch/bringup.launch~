@@ -8,9 +8,13 @@
   <arg name="chain_start" default="torso_lift_link" />
   <arg name="chain_end" default="wrist_flex_link" />
   <arg name="timeout" default="0.005" />
+  <arg name="end_effector_x" default="0" />
+  <arg name="end_effector_y" default="0" />
+  <arg name="end_effector_z" default="0" />
     
   <include file="$(find fetch_moveit_config)/launch/planning_context.launch">     
   <arg name="load_robot_description" value="true"/>   </include>
+ 
 
   <!-- Start Gazebo with a blank world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -24,6 +28,10 @@
 
   <!-- Oh, you wanted a robot? -->
   <include file="$(find fetch_common)/launch/include/$(arg robot).launch.xml" />
+  
+  <include file="$(find fetch_navigation)/launch/fetch_nav.launch"> 
+  	<arg name="map_file" value="$(find fetch_gazebo_demo)/maps/test_zone.yaml" />
+  </include>
   
 
 </launch>

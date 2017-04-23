@@ -2,8 +2,6 @@
 
 bool TrajectoryFollow::isJointStatePopulated = false;
 
-
-
 std::vector<float> TrajectoryFollow::getJoint_states() const
 {
     return joint_states;
@@ -40,6 +38,7 @@ void TrajectoryFollow::startMoveBase(move_base_msgs::MoveBaseGoal& base_goal)
 {
     base_goal.target_pose.header.stamp = ros::Time::now() + ros::Duration(1.0);
     base_client->sendGoal(base_goal);
+    base_client->waitForResult(ros::Duration(10.0));
 }
 
 void TrajectoryFollow::startGripperAction(control_msgs::GripperCommandGoal& gripper_goal)
@@ -168,9 +167,10 @@ move_base_msgs::MoveBaseGoal TrajectoryFollow::baseMove()
 {
     move_base_msgs::MoveBaseGoal base_goal;
 
-    base_goal.target_pose.pose.position.x = 10.0;
+    base_goal.target_pose.pose.position.x = 1;
+    base_goal.target_pose.pose.position.y = 1.2;
     base_goal.target_pose.pose.orientation.w = 1.0;
-    //base_goal.target_pose.header.frame_id = 'first';
+    base_goal.target_pose.header.frame_id = "map";
     base_goal.target_pose.header.stamp = ros::Time::now();
     return base_goal;
 }
@@ -182,14 +182,11 @@ double TrajectoryFollow::fRand(double min, double max)
 }
 
 
-bool TrajectoryFollow::solve_ik(double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string urdf_param, KDL::JntArray &result)
+bool TrajectoryFollow::solve_ik(double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string urdf_param, KDL::JntArray &result, double x, double y, double z)
 {
 
     double eps = 1e-5;
 
-    // This constructor parses the URDF loaded in rosparm urdf_param into the
-    // needed KDL structures.  We then pull these out to compare against the KDL
-    // IK solver.
     TRAC_IK::TRAC_IK tracik_solver(chain_start, chain_end, urdf_param, timeout, eps);
 
     KDL::Chain chain;
@@ -219,41 +216,35 @@ bool TrajectoryFollow::solve_ik(double num_samples, std::string chain_start, std
     KDL::ChainFkSolverPos_recursive fk_solver(chain); // Forward kin. solver
     KDL::ChainIkSolverVel_pinv vik_solver(chain); // PseudoInverse vel solver
     KDL::ChainIkSolverPos_NR_JL kdl_solver(chain,ll,ul,fk_solver, vik_solver, 1, eps); // Joint Limit Solver
-    // 1 iteration per solve (will wrap in timed loop to compare with TRAC-IK)
 
-
-    // Create Nominal chain configuration midway between all joint limits
     KDL::JntArray nominal(chain.getNrOfJoints());
 
     for (uint j=0; j<nominal.data.size(); j++) {
         nominal(j) = (ll(j)+ul(j))/2.0;
     }
 
-    //Create desired number of valid, random joint configurations
     std::vector<KDL::JntArray> JointList;
     KDL::JntArray q(chain.getNrOfJoints());
 
-    for (uint i=0; i < num_samples; i++) {
+    for (uint i = 0; i < num_samples; i++) {
         for (uint j=0; j<ll.data.size(); j++) {
             q(j)=fRand(ll(j), ul(j));
         }
         JointList.push_back(q);
     }
 
-//    KDL::JntArray result;
     KDL::Frame end_effector_pose;
     int rc;
 
     end_effector_pose.M = KDL::Rotation::Quaternion(0, 0, 0, 1.0);
 
-    end_effector_pose.p = KDL::Vector(0.1, 0.1, 0.1);
+    end_effector_pose.p = KDL::Vector(x, y, z);
 
 
 
     ROS_INFO_STREAM("*** Testing TRAC-IK with "<<num_samples<<" random samples");
 
     for (uint i=0; i < num_samples; i++) {
-        //fk_solver.JntToCart(JointList[i],end_effector_pose);
         rc=tracik_solver.CartToJnt(nominal,end_effector_pose,result);
     }
 
