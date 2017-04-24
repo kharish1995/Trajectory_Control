@@ -94,39 +94,23 @@ MatrixXd TrajectoryFollow::trajectory(const MatrixXd& joint_positions, float tf)
               joint_positions(0,5), 0, 0, joint_positions(1,5), 0, 0;
 
     inputs.transposeInPlace();
-    std::cout << "miNVERSE:" << M.inverse() << std::endl;
-    std::cout << "inputs:" << inputs << std::endl;
+    //std::cout << "miNVERSE:" << M.inverse() << std::endl;
+    //std::cout << "inputs:" << inputs << std::endl;
     MatrixXd outputs(6,6);
     outputs = (M.inverse())*inputs;
-    std::cout << "outputs:" << outputs << std::endl;
+    //std::cout << "outputs:" << outputs << std::endl;
     return outputs;
 }
 
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-control_msgs::FollowJointTrajectoryGoal TrajectoryFollow::armExtensionTrajectory(const MatrixXf& input)
-=======
 control_msgs::GripperCommandGoal TrajectoryFollow::gripperTrajectory(double effort, double position )
 {
     control_msgs::GripperCommandGoal gripper_goal;
     gripper_goal.command.max_effort = effort;
     gripper_goal.command.position = position;
-=======
-control_msgs::GripperCommandGoal TrajectoryFollow::gripperTrajectory()
-{
-    control_msgs::GripperCommandGoal gripper_goal;
-    gripper_goal.command.max_effort = 10;
-    gripper_goal.command.position = 0;
->>>>>>> master
-
     return gripper_goal;
 }
 
 control_msgs::FollowJointTrajectoryGoal TrajectoryFollow::armExtensionTrajectory(const MatrixXd& input)
-<<<<<<< HEAD
->>>>>>> Stashed changes
-=======
->>>>>>> master
 {
     control_msgs::FollowJointTrajectoryGoal arm_goal;
     arm_goal.trajectory.joint_names.push_back("shoulder_pan_joint");
@@ -178,22 +162,12 @@ control_msgs::FollowJointTrajectoryGoal TrajectoryFollow::armExtensionTrajectory
     return arm_goal;
 }
 
-move_base_msgs::MoveBaseGoal TrajectoryFollow::baseMove()
+move_base_msgs::MoveBaseGoal TrajectoryFollow::baseMove(double x, double y, double w)
 {
     move_base_msgs::MoveBaseGoal base_goal;
-
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-    base_goal.target_pose.pose.position.x = 10.0;
-=======
-    base_goal.target_pose.pose.position.x = 1.1;
-    base_goal.target_pose.pose.position.y = 1.0;
->>>>>>> Stashed changes
-=======
-    base_goal.target_pose.pose.position.x = 1;
-    base_goal.target_pose.pose.position.y = 1.2;
->>>>>>> master
-    base_goal.target_pose.pose.orientation.w = 1.0;
+    base_goal.target_pose.pose.position.x = x;
+    base_goal.target_pose.pose.position.y = y;
+    base_goal.target_pose.pose.orientation.w = w;
     base_goal.target_pose.header.frame_id = "map";
     base_goal.target_pose.header.stamp = ros::Time::now();
     return base_goal;
@@ -233,7 +207,7 @@ bool TrajectoryFollow::solve_ik(double num_samples, std::string chain_start, std
     assert(chain.getNrOfJoints() == ll.data.size());
     assert(chain.getNrOfJoints() == ul.data.size());
 
-    ROS_INFO ("Using %d joints",chain.getNrOfJoints());
+    //ROS_INFO ("Using %d joints",chain.getNrOfJoints());
 
 
     // Set up KDL IK
@@ -266,13 +240,13 @@ bool TrajectoryFollow::solve_ik(double num_samples, std::string chain_start, std
 
 
 
-    ROS_INFO_STREAM("*** Testing TRAC-IK with "<<num_samples<<" random samples");
+    //ROS_INFO_STREAM("*** Testing TRAC-IK with "<<num_samples<<" random samples");
 
     for (uint i=0; i < num_samples; i++) {
         rc=tracik_solver.CartToJnt(nominal,end_effector_pose,result);
     }
 
-    ROS_INFO_STREAM("Result data - " << result.data);
+    //ROS_INFO_STREAM("Result data - " << result.data);
     return 1;
 }
 

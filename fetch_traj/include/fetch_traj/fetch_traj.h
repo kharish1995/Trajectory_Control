@@ -37,25 +37,15 @@ private:
      baseClient *base_client;
      gripperClient *gripper_client;
      MatrixXd outputs;
-
      ros::Subscriber jointStateSub_;
 
 public:
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-    TrajectoryFollow();
-=======
-     std::vector<float> joint_states;
-     static bool isJointStatePopulated;
 
      TrajectoryFollow(ros::NodeHandle&);
->>>>>>> Stashed changes
-=======
-     std::vector<float> joint_states;
-     static bool isJointStatePopulated;
 
-     TrajectoryFollow(ros::NodeHandle& nh);
->>>>>>> master
+     std::vector<float> joint_states;
+
+     static bool isJointStatePopulated;
 
     ~TrajectoryFollow();
     
@@ -69,32 +59,18 @@ public:
 
     void jointsCallback(const sensor_msgs::JointState&);
 
-<<<<<<< HEAD
-<<<<<<< Updated upstream
-    MatrixXf trajectory(const MatrixXf& joint_positions, float tf);
-
     control_msgs::FollowJointTrajectoryGoal armExtensionTrajectory(const MatrixXf& input);
-=======
+
     MatrixXd trajectory(const MatrixXd&, float);
 
     control_msgs::FollowJointTrajectoryGoal armExtensionTrajectory(const MatrixXd&);
 
     control_msgs::GripperCommandGoal gripperTrajectory(double, double);
->>>>>>> Stashed changes
-=======
-    MatrixXd trajectory(const MatrixXd& joint_positions, float tf);
-
-    control_msgs::FollowJointTrajectoryGoal armExtensionTrajectory(const MatrixXd& input);
-
-    control_msgs::GripperCommandGoal gripperTrajectory();
->>>>>>> master
     
-    move_base_msgs::MoveBaseGoal baseMove();
+    move_base_msgs::MoveBaseGoal baseMove(double, double, double);
 
     void startMoveBase(move_base_msgs::MoveBaseGoal&);
 
-<<<<<<< Updated upstream
-=======
     void startGripperAction(control_msgs::GripperCommandGoal&);
 
     bool solve_ik(double, std::string, std::string, double, std::string, KDL::JntArray&, double, double, double);
@@ -103,16 +79,4 @@ public:
 
     std::vector<float> getJoint_states() const;
 
-<<<<<<< HEAD
->>>>>>> Stashed changes
-=======
-    void startGripperAction(control_msgs::GripperCommandGoal& gripper_goal);
-
-    bool solve_ik(double num_samples, std::string chain_start, std::string chain_end, double timeout, std::string, KDL::JntArray &result, double x, double y, double z);
-
-    double fRand(double min, double max);
-
-    std::vector<float> getJoint_states() const;
-
->>>>>>> master
 };
