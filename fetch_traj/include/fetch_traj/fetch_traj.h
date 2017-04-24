@@ -40,7 +40,6 @@ private:
      ros::Subscriber jointStateSub_;
 
 public:
-
      TrajectoryFollow(ros::NodeHandle&);
 
      std::vector<float> joint_states;
@@ -58,8 +57,6 @@ public:
     actionlib::SimpleClientGoalState getGripperState();
 
     void jointsCallback(const sensor_msgs::JointState&);
-
-    control_msgs::FollowJointTrajectoryGoal armExtensionTrajectory(const MatrixXf& input);
 
     MatrixXd trajectory(const MatrixXd&, float);
 
