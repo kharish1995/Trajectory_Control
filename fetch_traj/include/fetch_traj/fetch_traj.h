@@ -33,22 +33,48 @@ private:
      MatrixXf outputs;
 
 public:
+<<<<<<< Updated upstream
     TrajectoryFollow();
+=======
+     std::vector<float> joint_states;
+     static bool isJointStatePopulated;
+
+     TrajectoryFollow(ros::NodeHandle&);
+>>>>>>> Stashed changes
 
     ~TrajectoryFollow();
     
-    void startTrajectory(control_msgs::FollowJointTrajectoryGoal& arm_goal);
+    void startTrajectory(control_msgs::FollowJointTrajectoryGoal&);
     
     actionlib::SimpleClientGoalState getState();
 
-    void jointsCallback(const sensor_msgs::JointState& state);
+    void jointsCallback(const sensor_msgs::JointState&);
 
+<<<<<<< Updated upstream
     MatrixXf trajectory(const MatrixXf& joint_positions, float tf);
 
     control_msgs::FollowJointTrajectoryGoal armExtensionTrajectory(const MatrixXf& input);
+=======
+    MatrixXd trajectory(const MatrixXd&, float);
+
+    control_msgs::FollowJointTrajectoryGoal armExtensionTrajectory(const MatrixXd&);
+
+    control_msgs::GripperCommandGoal gripperTrajectory(double, double);
+>>>>>>> Stashed changes
     
     move_base_msgs::MoveBaseGoal baseMove();
 
-    void startMoveBase(move_base_msgs::MoveBaseGoal& base_goal);
+    void startMoveBase(move_base_msgs::MoveBaseGoal&);
 
+<<<<<<< Updated upstream
+=======
+    void startGripperAction(control_msgs::GripperCommandGoal&);
+
+    bool solve_ik(double, std::string, std::string, double, std::string, KDL::JntArray&, double, double, double);
+
+    double fRand(double, double);
+
+    std::vector<float> getJoint_states() const;
+
+>>>>>>> Stashed changes
 };

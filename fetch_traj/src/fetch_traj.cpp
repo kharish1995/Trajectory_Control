@@ -69,7 +69,20 @@ MatrixXf TrajectoryFollow::trajectory(const MatrixXf& joint_positions, float tf)
     return outputs;
 }
 
+<<<<<<< Updated upstream
 control_msgs::FollowJointTrajectoryGoal TrajectoryFollow::armExtensionTrajectory(const MatrixXf& input)
+=======
+control_msgs::GripperCommandGoal TrajectoryFollow::gripperTrajectory(double effort, double position )
+{
+    control_msgs::GripperCommandGoal gripper_goal;
+    gripper_goal.command.max_effort = effort;
+    gripper_goal.command.position = position;
+
+    return gripper_goal;
+}
+
+control_msgs::FollowJointTrajectoryGoal TrajectoryFollow::armExtensionTrajectory(const MatrixXd& input)
+>>>>>>> Stashed changes
 {
     control_msgs::FollowJointTrajectoryGoal arm_goal;
     ROS_INFO("1");
@@ -129,7 +142,12 @@ move_base_msgs::MoveBaseGoal TrajectoryFollow::baseMove()
 {
     move_base_msgs::MoveBaseGoal base_goal;
 
+<<<<<<< Updated upstream
     base_goal.target_pose.pose.position.x = 10.0;
+=======
+    base_goal.target_pose.pose.position.x = 1.1;
+    base_goal.target_pose.pose.position.y = 1.0;
+>>>>>>> Stashed changes
     base_goal.target_pose.pose.orientation.w = 1.0;
     base_goal.target_pose.header.frame_id = 'first';
     base_goal.target_pose.header.stamp = ros::Time::now();
