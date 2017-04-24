@@ -16,10 +16,12 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, "fetch_traj_node");
     ros::NodeHandle nh;
-    TrajectoryFollow dynam;
+    TrajectoryFollow dynam(nh);
 
-    //ros::Subscriber sub = nh.subscribe("joint_states", 1000, &TrajectoryFollow::jointsCallback, &dynam);
+    srand(1);
+    KDL::JntArray result;
 
+<<<<<<< HEAD
 //    MatrixXf joint_positions(2,6);
 //    //ROS_INFO_STREAM("jointstates" << joint_states[0] << std::endl);
 //    joint_positions << 1.3200041507484386, 1.3999855756514323, -0.19988558358145525, 1.719970634612789, 5.510375048700666e-06, 1.6600036782876648,
@@ -29,12 +31,17 @@ int main(int argc, char **argv)
 //    ROS_INFO_STREAM(joint_positions << std::endl);
 //    MatrixXf outputs(6,6);
 //    outputs = dynam.trajectory(joint_positions, t_max);
+=======
+    int num_samples;
+    std::string chain_start, chain_end, urdf_param;
+    double timeout;
+>>>>>>> master
 
-//    control_msgs::FollowJointTrajectoryGoal traj;
-//    traj = dynam.armExtensionTrajectory(outputs);
+    //end-effector pose
+    double x, y, z;
 
-//    dynam.startTrajectory(traj);
 
+<<<<<<< HEAD
     move_base_msgs::MoveBaseGoal base_goal = dynam.baseMove();
 =======
     MatrixXd outputs(6,6);
@@ -153,14 +160,58 @@ int main(int argc, char **argv)
 
 
 >>>>>>> Stashed changes
+=======
+    nh.param("num_samples", num_samples, 1);
+    nh.param("chain_start", chain_start, std::string("torso_lift_link"));
+    nh.param("chain_end", chain_end, std::string("wrist_flex_link"));
 
+    if (chain_start=="" || chain_end=="") {
+        ROS_FATAL("Missing chain info in launch file");
+        exit (-1);
+    }
+    ros::spinOnce();
+
+    nh.param("timeout", timeout, 0.005);
+    nh.param("urdf_param", urdf_param, std::string("/robot_description"));
+
+    nh.param("end_effector_x", x, 0.0);
+    nh.param("end_effector_y", y, 0.0);
+    nh.param("end_effector_z", z, 0.0);
+
+    if (num_samples < 1)
+        num_samples = 1;
+
+    dynam.solve_ik(num_samples, chain_start, chain_end, timeout, urdf_param, result, x, y, z);
+
+>>>>>>> master
+
+    MatrixXd joint_positions(2,6);
+
+    std::vector<float> joint_values = dynam.getJoint_states();
+
+    joint_positions << joint_values.at(0), joint_values.at(1), joint_values.at(2), joint_values.at(3), joint_values.at(4), joint_values.at(5),
+                       result.data;
+    
+    MatrixXd outputs(6,6);
+    outputs = dynam.trajectory(joint_positions, t_max);
+
+    move_base_msgs::MoveBaseGoal base_goal = dynam.baseMove();
     dynam.startMoveBase(base_goal);
 
-    while(!dynam.getState().isDone() && ros::ok())
+    control_msgs::FollowJointTrajectoryGoal traj;
+    traj = dynam.armExtensionTrajectory(outputs);
+    dynam.startTrajectory(traj);
+
+    control_msgs::GripperCommandGoal grip_goal;
+    grip_goal = dynam.gripperTrajectory();
+    dynam.startGripperAction(grip_goal);
+
+
+    while(!dynam.getArmState().isDone() && ros::ok() && !dynam.getGripperState().isDone() && !dynam.getBaseState().isDone())
     {
         usleep(50000);
     }
 
-    ros::spinOnce();
+
     return 0;
 }

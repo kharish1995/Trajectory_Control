@@ -4,13 +4,17 @@
   <arg name="debug" default="false"/>
   <arg name="gui" default="true"/>
   <arg name="headless" default="false"/>
-  <!--arg name="num_samples" default="1" />
+  <arg name="num_samples" default="1" />
   <arg name="chain_start" default="torso_lift_link" />
   <arg name="chain_end" default="wrist_flex_link" />
-  <arg name="timeout" default="0.005" /-->
+  <arg name="timeout" default="0.005" />
+  <arg name="end_effector_x" default="0" />
+  <arg name="end_effector_y" default="0" />
+  <arg name="end_effector_z" default="0" />
     
   <include file="$(find fetch_moveit_config)/launch/planning_context.launch">     
   <arg name="load_robot_description" value="true"/>   </include>
+ 
 
   <!-- Start Gazebo with a blank world -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
@@ -25,15 +29,9 @@
   <!-- Oh, you wanted a robot? -->
   <include file="$(find fetch_common)/launch/include/$(arg robot).launch.xml" />
   
-  <param name="robot_description" textfile="$(find fetch_description)/robots/fetch.urdf"/>
-
-
-  <!--node name="ik_solver" pkg="fetch_tracik" type="fetch_tracik_node" output="screen">
-    <param name="num_samples" value="$(arg num_samples)"/>
-    <param name="chain_start" value="$(arg chain_start)"/>
-    <param name="chain_end" value="$(arg chain_end)"/>
-    <param name="timeout" value="$(arg timeout)"/>
-    <param name="urdf_param" value="/robot_description"/>
-</node-->
+  <include file="$(find fetch_navigation)/launch/fetch_nav.launch"> 
+  	<arg name="map_file" value="$(find fetch_gazebo_demo)/maps/test_zone.yaml" />
+  </include>
+  
 
 </launch>
