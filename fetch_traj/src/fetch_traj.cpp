@@ -17,6 +17,7 @@ TrajectoryFollow::TrajectoryFollow(ros::NodeHandle& nh)
     outputs = MatrixXd::Random(6,6);
     nh_ = nh;
     joint_states.resize(6);
+    ros::Duration(2).sleep();
 }
 
 TrajectoryFollow::~TrajectoryFollow()

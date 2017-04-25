@@ -73,7 +73,7 @@ int main(int argc, char **argv)
             move_base_msgs::MoveBaseGoal base_goal = dynam.baseMove(1.0, 1.2, 1.0);
             dynam.startMoveBase(base_goal);
             ROS_INFO("Move Base1");
-            while(!dynam.getBaseState().isDone() && ros::ok())
+            while((!dynam.getBaseState().isDone()) && ros::ok())
             {
                 usleep(50000);
             }
