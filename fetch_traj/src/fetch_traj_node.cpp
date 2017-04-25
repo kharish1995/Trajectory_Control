@@ -172,7 +172,7 @@ int main(int argc, char **argv)
         break;
     }
 
-    while(!dynam.getArmState().isDone() && ros::ok() && !dynam.getGripperState().isDone() && !dynam.getBaseState().isDone())
+    while(!dynam.getArmState().isDone() && !dynam.getGripperState().isDone() && !dynam.getBaseState().isDone() && ros::ok())
     {
         usleep(50000);
     }

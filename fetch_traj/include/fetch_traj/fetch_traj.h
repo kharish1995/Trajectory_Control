@@ -39,12 +39,12 @@ private:
      MatrixXd outputs;
      ros::Subscriber jointStateSub_;
 
-public:
-     TrajectoryFollow(ros::NodeHandle&);
-
+public:    
      std::vector<float> joint_states;
 
      static bool isJointStatePopulated;
+
+     TrajectoryFollow(ros::NodeHandle&);
 
     ~TrajectoryFollow();
     
