@@ -73,7 +73,7 @@ int main(int argc, char **argv)
             move_base_msgs::MoveBaseGoal base_goal = dynam.baseMove(1.0, 1.2, 1.0);
             dynam.startMoveBase(base_goal);
             ROS_INFO("Move Base1");
-            while(ros::ok() && !dynam.getBaseState().isDone())
+            while(!dynam.getBaseState().isDone() && ros::ok())
             {
                 usleep(50000);
             }
@@ -81,19 +81,17 @@ int main(int argc, char **argv)
         }
         case MOVE_ARM1:
         {
-            MatrixXd joint_positions(2,6);
             ros::spinOnce();
-            std::vector<float> joint_values = dynam.getJoint_states();
+            joint_values = dynam.getJoint_states();
             dynam.solve_ik(num_samples, chain_start, chain_end, timeout, urdf_param, result, x, y, z);
             joint_positions << joint_values.at(0), joint_values.at(1), joint_values.at(2), joint_values.at(3), joint_values.at(4), joint_values.at(5),
                                result.data;
-            MatrixXd outputs(6,6);
             outputs = dynam.trajectory(joint_positions, t_max);
             control_msgs::FollowJointTrajectoryGoal traj;
             traj = dynam.armExtensionTrajectory(outputs);
             dynam.startTrajectory(traj);
             ROS_INFO("Move Arm1");
-            while(ros::ok() && !dynam.getArmState().isDone())
+            while(!dynam.getArmState().isDone() && ros::ok())
             {
                 usleep(50000);
             }
@@ -105,7 +103,7 @@ int main(int argc, char **argv)
             grip_goal = dynam.gripperTrajectory(10.0,0.0);
             dynam.startGripperAction(grip_goal);
             ROS_INFO("Close Gripper1");
-            while(ros::ok() && !dynam.getGripperState().isDone())
+            while(!dynam.getGripperState().isDone() && ros::ok())
             {
                 usleep(50000);
             }
@@ -113,19 +111,17 @@ int main(int argc, char **argv)
         }
         case TUCK_ARM:
         {
-            MatrixXd joint_positions(2,6);
             ros::spinOnce();
-            std::vector<float> joint_values = dynam.getJoint_states();
+            joint_values = dynam.getJoint_states();
             dynam.solve_ik(num_samples, chain_start, chain_end, timeout, urdf_param, result, 0, 0, 0.05);
             joint_positions << joint_values.at(0), joint_values.at(1), joint_values.at(2), joint_values.at(3), joint_values.at(4), joint_values.at(5),
                                result.data;
-            MatrixXd outputs(6,6);
             outputs = dynam.trajectory(joint_positions, t_max);
             control_msgs::FollowJointTrajectoryGoal traj;
             traj = dynam.armExtensionTrajectory(outputs);
             dynam.startTrajectory(traj);
             ROS_INFO("Tuck Arm");
-            while(ros::ok() && !dynam.getArmState().isDone())
+            while(!dynam.getArmState().isDone() && ros::ok())
             {
                 usleep(50000);
             }
@@ -136,7 +132,7 @@ int main(int argc, char **argv)
             move_base_msgs::MoveBaseGoal base_goal = dynam.baseMove(1.7, 1.9, 1.1);
             dynam.startMoveBase(base_goal);
             ROS_INFO("Move Base 2");
-            while(ros::ok() && !dynam.getBaseState().isDone())
+            while(!dynam.getBaseState().isDone() && ros::ok())
             {
                 usleep(50000);
             }
@@ -144,19 +140,17 @@ int main(int argc, char **argv)
         }
         case MOVE_ARM2:
         {
-            MatrixXd joint_positions(2,6);
             ros::spinOnce();
-            std::vector<float> joint_values = dynam.getJoint_states();
+            joint_values = dynam.getJoint_states();
             dynam.solve_ik(num_samples, chain_start, chain_end, timeout, urdf_param, result, x, y, z);
             joint_positions << joint_values.at(0), joint_values.at(1), joint_values.at(2), joint_values.at(3), joint_values.at(4), joint_values.at(5),
                                result.data;
-            MatrixXd outputs(6,6);
             outputs = dynam.trajectory(joint_positions, t_max);
             control_msgs::FollowJointTrajectoryGoal traj;
             traj = dynam.armExtensionTrajectory(outputs);
             dynam.startTrajectory(traj);
             ROS_INFO("Move Arm2");
-            while(ros::ok() && !dynam.getArmState().isDone())
+            while(!dynam.getArmState().isDone() && ros::ok())
             {
                 usleep(50000);
             }
@@ -168,7 +162,7 @@ int main(int argc, char **argv)
             grip_goal = dynam.gripperTrajectory(10.0,0.1);
             dynam.startGripperAction(grip_goal);
             ROS_INFO("Open Gripper1");
-            while(ros::ok() && !dynam.getGripperState().isDone())
+            while(!dynam.getGripperState().isDone() && ros::ok())
             {
                 usleep(50000);
             }
